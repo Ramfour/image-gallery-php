@@ -13,6 +13,80 @@ class Controller_Gallery extends Controller {
         $this->view->generate('gallery_view.php', 'template_view.php', ['images' => $images]);
     }
 
+    // GET  /?url=gallery/view&id=N  — страница фото + комментарии
+    // POST /?url=gallery/view&id=N  — добавить комментарий
+    public function action_view() {
+        $image_id = (int)($_GET['id'] ?? 0);
+        if (!$image_id) {
+            header('Location: /?url=gallery');
+            exit;
+        }
+
+        // загружаем фото
+        $stmt = $this->pdo->prepare(
+            'SELECT images.*, users.login FROM images
+             JOIN users ON images.user_id = users.id
+             WHERE images.id = ?'
+        );
+        $stmt->execute([$image_id]);
+        $image = $stmt->fetch();
+        if (!$image) {
+            header('Location: /?url=gallery');
+            exit;
+        }
+
+        // добавление комментария
+        $error = null;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SESSION['user_id'])) {
+            $text = trim($_POST['text'] ?? '');
+            if ($text === '') {
+                $error = 'Комментарий не может быть пустым';
+            } else {
+                $stmt = $this->pdo->prepare(
+                    'INSERT INTO comments (image_id, user_id, text) VALUES (?, ?, ?)'
+                );
+                $stmt->execute([$image_id, $_SESSION['user_id'], $text]);
+                header('Location: /?url=gallery/view&id=' . $image_id);
+                exit;
+            }
+        }
+
+        // загружаем комментарии
+        $stmt = $this->pdo->prepare(
+            'SELECT comments.*, users.login FROM comments
+             JOIN users ON comments.user_id = users.id
+             WHERE comments.image_id = ?
+             ORDER BY comments.created_at ASC'
+        );
+        $stmt->execute([$image_id]);
+        $comments = $stmt->fetchAll();
+
+        $this->view->generate('image_view.php', 'template_view.php', [
+            'image'    => $image,
+            'comments' => $comments,
+            'error'    => $error,
+        ]);
+    }
+
+    // POST /?url=gallery/deletecomment — удалить свой комментарий
+    public function action_deletecomment() {
+        $this->requireAuth();
+
+        $comment_id = (int)($_POST['comment_id'] ?? 0);
+        $image_id   = (int)($_POST['image_id'] ?? 0);
+
+        if ($comment_id) {
+            // только свой комментарий
+            $stmt = $this->pdo->prepare(
+                'DELETE FROM comments WHERE id = ? AND user_id = ?'
+            );
+            $stmt->execute([$comment_id, $_SESSION['user_id']]);
+        }
+
+        header('Location: /?url=gallery/view&id=' . $image_id);
+        exit;
+    }
+
     // POST /?url=gallery/delete — удаление фото (только владелец)
     public function action_delete() {
         $this->requireAuth();
