@@ -25,14 +25,14 @@ class Route
 
 		// подцепляем файл с классом модели (файла модели может и не быть)
 		$model_file = strtolower($model_name) . '.php';
-		$model_path = 'application/models/' . $model_file;
+		$model_path = $_SERVER['DOCUMENT_ROOT'] . '/application/models/' . $model_file;
 		if (file_exists($model_path)) {
 			include $model_path;
 		}
 
 		// подцепляем файл с классом контроллера
 		$controller_file = strtolower($controller_name) . '.php';
-		$controller_path = 'application/controllers/' . $controller_file;
+		$controller_path = $_SERVER['DOCUMENT_ROOT'] . '/application/controllers/' . $controller_file;
 		if (file_exists($controller_path)) {
 			include $controller_path;
 		} else {

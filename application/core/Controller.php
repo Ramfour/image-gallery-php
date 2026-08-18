@@ -8,7 +8,7 @@ class Controller
     function __construct()
     {
         $this->view = new View();
-        $this->pdo = require_once 'application/core/db.php';
+        $this->pdo = require_once $_SERVER['DOCUMENT_ROOT'] . '/application/core/db.php';
     }
 
     protected function requireAuth()

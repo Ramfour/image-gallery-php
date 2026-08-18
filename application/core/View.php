@@ -6,6 +6,6 @@ class View
 		if (is_array($data)) {
 			extract($data); // превращает ['error' => '...'] в $error
 		}
-		include 'application/views/'.$template_view;
+		include $_SERVER['DOCUMENT_ROOT'] . '/application/views/' . $template_view;
 	}
 }
