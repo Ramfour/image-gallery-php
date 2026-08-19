@@ -1,15 +1,21 @@
 <?php
-/** @see Controller */
-class Controller_Auth extends Controller {
 
+namespace App\Controllers;
+
+use App\Core\Controller;
+
+class ControllerAuth extends Controller
+{
     // GET /?url=auth — показать форму логина/регистрации
     // POST /?url=auth — обработать форму
-    public function action_index() {
+    public function actionIndex(): void
+    {
         $this->view->generate('auth_view.php', 'template_view.php');
     }
 
     // POST /?url=auth/login
-    public function action_login() {
+    public function actionLogin(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /?url=auth');
             exit;
@@ -47,7 +53,8 @@ class Controller_Auth extends Controller {
 
     // GET /?url=auth/register — показать форму регистрации
     // POST /?url=auth/register — обработать регистрацию
-    public function action_register() {
+    public function actionRegister(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $login    = trim($_POST['login'] ?? '');
             $password = $_POST['password'] ?? '';
@@ -91,7 +98,8 @@ class Controller_Auth extends Controller {
     }
 
     // GET /?url=auth/logout
-    public function action_logout() {
+    public function actionLogout(): void
+    {
         session_destroy();
         header('Location: /');
         exit;

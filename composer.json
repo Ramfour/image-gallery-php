@@ -1,0 +1,21 @@
+{
+    "name": "ramfour/image-gallery-php",
+    "description": "Image gallery with user authentication and comments (PHP MVC)",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ramfour"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\Core\\": "application/core/",
+            "App\\Controllers\\": "application/controllers/",
+            "App\\Models\\": "application/models/"
+        }
+    }
+}

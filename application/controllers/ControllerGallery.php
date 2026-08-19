@@ -1,9 +1,14 @@
 <?php
-/** @see Controller */
-class Controller_Gallery extends Controller {
 
+namespace App\Controllers;
+
+use App\Core\Controller;
+
+class ControllerGallery extends Controller
+{
     // GET /?url=gallery — показать галерею
-    public function action_index() {
+    public function actionIndex(): void
+    {
         $stmt = $this->pdo->query(
             'SELECT images.*, users.login FROM images
              JOIN users ON images.user_id = users.id
@@ -15,9 +20,10 @@ class Controller_Gallery extends Controller {
 
     // GET  /?url=gallery/view&id=N  — страница фото + комментарии
     // POST /?url=gallery/view&id=N  — добавить комментарий
-    public function action_view() {
-        $image_id = (int)($_GET['id'] ?? 0);
-        if (!$image_id) {
+    public function actionView(): void
+    {
+        $imageId = (int)($_GET['id'] ?? 0);
+        if (!$imageId) {
             header('Location: /?url=gallery');
             exit;
         }
@@ -28,7 +34,7 @@ class Controller_Gallery extends Controller {
              JOIN users ON images.user_id = users.id
              WHERE images.id = ?'
         );
-        $stmt->execute([$image_id]);
+        $stmt->execute([$imageId]);
         $image = $stmt->fetch();
         if (!$image) {
             header('Location: /?url=gallery');
@@ -45,8 +51,8 @@ class Controller_Gallery extends Controller {
                 $stmt = $this->pdo->prepare(
                     'INSERT INTO comments (image_id, user_id, text) VALUES (?, ?, ?)'
                 );
-                $stmt->execute([$image_id, $_SESSION['user_id'], $text]);
-                header('Location: /?url=gallery/view&id=' . $image_id);
+                $stmt->execute([$imageId, $_SESSION['user_id'], $text]);
+                header('Location: /?url=gallery/view&id=' . $imageId);
                 exit;
             }
         }
@@ -58,7 +64,7 @@ class Controller_Gallery extends Controller {
              WHERE comments.image_id = ?
              ORDER BY comments.created_at ASC'
         );
-        $stmt->execute([$image_id]);
+        $stmt->execute([$imageId]);
         $comments = $stmt->fetchAll();
 
         $this->view->generate('image_view.php', 'template_view.php', [
@@ -69,37 +75,39 @@ class Controller_Gallery extends Controller {
     }
 
     // POST /?url=gallery/deletecomment — удалить свой комментарий
-    public function action_deletecomment() {
+    public function actionDeletecomment(): void
+    {
         $this->requireAuth();
 
-        $comment_id = (int)($_POST['comment_id'] ?? 0);
-        $image_id   = (int)($_POST['image_id'] ?? 0);
+        $commentId = (int)($_POST['comment_id'] ?? 0);
+        $imageId   = (int)($_POST['image_id'] ?? 0);
 
-        if ($comment_id) {
+        if ($commentId) {
             // только свой комментарий
             $stmt = $this->pdo->prepare(
                 'DELETE FROM comments WHERE id = ? AND user_id = ?'
             );
-            $stmt->execute([$comment_id, $_SESSION['user_id']]);
+            $stmt->execute([$commentId, $_SESSION['user_id']]);
         }
 
-        header('Location: /?url=gallery/view&id=' . $image_id);
+        header('Location: /?url=gallery/view&id=' . $imageId);
         exit;
     }
 
     // POST /?url=gallery/delete — удаление фото (только владелец)
-    public function action_delete() {
+    public function actionDelete(): void
+    {
         $this->requireAuth();
 
-        $image_id = (int)($_POST['image_id'] ?? 0);
-        if (!$image_id) {
+        $imageId = (int)($_POST['image_id'] ?? 0);
+        if (!$imageId) {
             header('Location: /?url=gallery');
             exit;
         }
 
         // проверяем что это фото именно этого пользователя
         $stmt = $this->pdo->prepare('SELECT filename, user_id FROM images WHERE id = ?');
-        $stmt->execute([$image_id]);
+        $stmt->execute([$imageId]);
         $image = $stmt->fetch();
 
         if (!$image || $image['user_id'] != $_SESSION['user_id']) {
@@ -115,7 +123,7 @@ class Controller_Gallery extends Controller {
 
         // удаляем запись из БД (комментарии удалятся каскадно)
         $stmt = $this->pdo->prepare('DELETE FROM images WHERE id = ?');
-        $stmt->execute([$image_id]);
+        $stmt->execute([$imageId]);
 
         header('Location: /?url=gallery');
         exit;
@@ -123,7 +131,8 @@ class Controller_Gallery extends Controller {
 
     // GET  /?url=gallery/upload — форма загрузки
     // POST /?url=gallery/upload — обработка загрузки
-    public function action_upload() {
+    public function actionUpload(): void
+    {
         $this->requireAuth();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

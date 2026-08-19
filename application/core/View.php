@@ -1,11 +1,14 @@
 <?php
+
+namespace App\Core;
+
 class View
 {
-	function generate($content_view, $template_view, $data = null)
-	{
-		if (is_array($data)) {
-			extract($data); // превращает ['error' => '...'] в $error
-		}
-		include $_SERVER['DOCUMENT_ROOT'] . '/application/views/' . $template_view;
-	}
+    public function generate(string $contentView, string $templateView, ?array $data = null): void
+    {
+        if (is_array($data)) {
+            extract($data);
+        }
+        include $_SERVER['DOCUMENT_ROOT'] . '/application/views/' . $templateView;
+    }
 }

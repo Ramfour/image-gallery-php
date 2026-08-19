@@ -1,9 +1,15 @@
 <?php
+
 session_start();
+
+// Подключаем Composer автозагрузку
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Подключаем конфигурацию
 require_once __DIR__ . '/../config.php';
+
+// Подключаем БД (должен вернуть PDO)
 $pdo = require_once __DIR__ . '/core/db.php';
-require_once __DIR__ . '/core/Model.php';
-require_once __DIR__ . '/core/View.php';
-require_once __DIR__ . '/core/Controller.php';
-require_once __DIR__ . '/core/route.php';
-Route::start(); // запускаем маршрутизатор
+
+// Запускаем маршрутизатор
+\App\Core\Route::start();
